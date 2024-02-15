@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model delivery_address {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description String  @db.VarChar(255)
+  usr_id      String? @db.Uuid
+  city        String? @db.VarChar(128)
+  street      String? @db.VarChar(128)
+  usr         usr?    @relation(fields: [usr_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ordr        ordr[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model delivery_method {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  method_name      String             @db.VarChar(64)
+  price            Int?
+  ordr             ordr[]
+  portin_warehouse portin_warehouse[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model ordr {
+  id                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description         String?           @db.VarChar(255)
+  massa               Decimal           @db.Decimal(5, 3)
+  ordr_date           DateTime?         @db.Timestamp(6)
+  ordr_priority       String            @db.VarChar(64)
+  usr_id              String?           @db.Uuid
+  point_id            String?           @db.Uuid
+  status_id           String?           @db.Uuid
+  delivery_method_id  String?           @db.Uuid
+  delivery_address_id String?           @db.Uuid
+  dimension           Int?
+  delivery_address    delivery_address? @relation(fields: [delivery_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  delivery_method     delivery_method?  @relation(fields: [delivery_method_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  point               point?            @relation(fields: [point_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status_ordr         status_ordr?      @relation(fields: [status_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usr                 usr?              @relation(fields: [usr_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  portin              portin[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model point {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  point_name String  @db.VarChar(64)
+  city       String? @db.VarChar(128)
+  street     String? @db.VarChar(128)
+  ordr       ordr[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model portin {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  massa            Decimal            @db.Decimal(5, 3)
+  description      String?            @db.VarChar(255)
+  ordr_id          String?            @db.Uuid
+  status_portin_id String?            @db.Uuid
+  dimension        Int?
+  ordr             ordr?              @relation(fields: [ordr_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status_portin    status_portin?     @relation(fields: [status_portin_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  portin_product   portin_product[]
+  portin_warehouse portin_warehouse[]
+  product          product[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model portin_product {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product_id       String?  @db.Uuid
+  portin_id        String?  @db.Uuid
+  quantity_product Int?
+  portin           portin?  @relation(fields: [portin_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "portin_warehouse_portin_id_fkey")
+  product          product? @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "portin_warehouse_product_id_fkey")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model portin_warehouse {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  portin_id          String?          @db.Uuid
+  warehouse_id       String?          @db.Uuid
+  date_arrival       DateTime?        @db.Timestamp(6)
+  date_departure     DateTime?        @db.Timestamp(6)
+  delivery_method_id String?          @db.Uuid
+  delivery_method    delivery_method? @relation(fields: [delivery_method_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  portin             portin?          @relation(fields: [portin_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  warehouse          warehouse?       @relation(fields: [warehouse_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model product {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product_name   String           @db.VarChar(64)
+  description    String           @db.VarChar(255)
+  serial_number  String?          @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  portin_id      String?          @db.Uuid
+  warehouse_id   String?          @db.Uuid
+  portin_product portin_product[]
+  portin         portin?          @relation(fields: [portin_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  warehouse      warehouse?       @relation(fields: [warehouse_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model status_ordr {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status_name String    @db.VarChar(128)
+  status_date DateTime? @db.Timestamp(6)
+  ordr        ordr[]
+}
+
+model status_portin {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status_name String   @db.VarChar(128)
+  status_date DateTime @db.Timestamp(6)
+  portin      portin[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model usr {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name       String             @db.VarChar(64)
+  last_name        String             @db.VarChar(64)
+  email            String             @unique @db.VarChar(128)
+  phone            String             @db.VarChar(32)
+  role_value       String             @db.VarChar(32)
+  delivery_address delivery_address[]
+  ordr             ordr[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model warehouse {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  warehouse_name   String             @db.VarChar(64)
+  city             String?            @db.VarChar(128)
+  street           String?            @db.VarChar(128)
+  portin_warehouse portin_warehouse[]
+  product          product[]
+}
