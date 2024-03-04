@@ -1,15 +1,15 @@
-// import prisma from "../DB/db.config";
+import prisma from "../DB/db.config.js";
 
-// // * Receiving all portions of a certain order
-// export const fetchPortion = async (req, res) => {
-// 	const order_id = req.params.id
+// * Receiving all portions of a certain order
+export const fetchPortion = async (req, res) => {
+	const order_id = req.params.id
 
-// 	const portion = await prisma.portin.findMany({
+	const portion = await prisma.portin.findMany({
 
-// 		where: {
-// 			ordr_id: order_id
-// 		}
-// 	})
+		where: {
+			ordr_id: order_id
+		}
+	})
 
-// 	return res.json({ status: 200, data: portion })
-// }
+	return res.json({ status: 200, data: portion })
+}

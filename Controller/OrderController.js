@@ -1,4 +1,5 @@
 import prisma from "../DB/db.config.js"
+import validatorSignup from "../validations/orders.js"
 
 // * Get all order
 export const fetchOrders = async (req, res) => {
@@ -9,6 +10,13 @@ export const fetchOrders = async (req, res) => {
 
 // * Create order
 export const createOrder = async (req, res) => {
+
+	const { error } = validatorSignup(req.body)
+
+	if (error) {
+		return res.status(400).json({ type: "Joi", message: error.details[0].message })
+	}
+
 	const { description, massa, ordr_priority, usr_id, point_id, status_id, dimension } = req.body
 
 	const newOrder = await prisma.ordr.create({
@@ -16,7 +24,7 @@ export const createOrder = async (req, res) => {
 			description,
 			massa,
 			ordr_date: new Date(),
-			ordr_priority,
+			ordr_priority: ordr_priority || '',
 			usr_id,
 			point_id,
 			status_id,

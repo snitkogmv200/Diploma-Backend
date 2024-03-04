@@ -1,9 +1,9 @@
-// import { Router } from "express";
-// import { fetchPortion } from "../Controller/PortionController.js";
+import { Router } from "express";
+import { fetchPortion } from "../Controller/PortionController.js";
 
-// const router = Router()
+const router = Router()
 
-// router.get("/:id", fetchPortion)
+router.get("/:id", fetchPortion)
 
 
-// export default router
+export default router

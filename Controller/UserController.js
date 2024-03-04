@@ -10,13 +10,12 @@ export const fetchUsers = async (req, res) => {
 // * Create user
 export const createUser = async (req, res) => {
 	const { first_name, last_name, email, phone, role_value } = req.body
-	console.log(req.body)
+
 	const findUser = await prisma.usr.findUnique({
 		where: {
 			email: email,
 		}
 	})
-	console.log(findUser)
 
 	if (findUser) {
 		return res.json({ status: 400, message: "Email Already Taken. Please another email." })
